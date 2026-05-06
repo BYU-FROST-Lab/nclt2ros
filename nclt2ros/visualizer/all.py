@@ -6,7 +6,7 @@ from nclt2ros.visualizer.gps import GPS
 from nclt2ros.visualizer.wheel_odom import WheelOdom
 
 
-class AllSensors(Plotter, GroundTruth, GPS_RTK, GPS, WheelOdom):
+class AllSensors(GroundTruth, GPS_RTK, GPS, WheelOdom, Plotter):
     """Class to visualize all sensor data in one plot
 
     USAGE:

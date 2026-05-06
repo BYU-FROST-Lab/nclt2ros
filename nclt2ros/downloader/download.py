@@ -12,7 +12,8 @@ class Download:
 
     def __init__(self, date, raw_data_path, lb3=False, sen=False, hokuyo=False, vel=False, gt=False, gt_cov=False):
 
-        self.download_url_dir = 'http://robots.engin.umich.edu/nclt'
+        # self.download_url_dir = 'http://robots.engin.umich.edu/nclt'
+        self.download_url_dir = 'https://s3.us-east-2.amazonaws.com/nclt.perl.engin.umich.edu'
         self.dates = ['2012-01-08', '2012-01-15', '2012-01-22', '2012-02-02', '2012-02-04', '2012-02-05', '2012-02-12',
                       '2012-02-18', '2012-02-19', '2012-03-17', '2012-03-25', '2012-03-31', '2012-04-29', '2012-05-11',
                       '2012-05-26', '2012-06-15', '2012-08-04', '2012-08-20', '2012-09-28', '2012-10-28', '2012-11-04',

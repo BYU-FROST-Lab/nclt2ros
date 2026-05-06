@@ -35,7 +35,7 @@ class VelodyneSyncData(BaseRawData, BaseConvert):
         else:
             raise ValueError('velodyne_data not exists')
 
-        timestamps_microsec = sorted([long(os.path.splitext(f)[0]) for f in files if f.endswith('.bin')])
+        timestamps_microsec = sorted([int(os.path.splitext(f)[0]) for f in files if f.endswith('.bin')])
         bin_files = sorted([f for f in files if f.endswith('.bin')])
 
         return timestamps_microsec, bin_files
@@ -69,13 +69,13 @@ class VelodyneSyncData(BaseRawData, BaseConvert):
 
         try:
             os.chdir(self.velodyne_sync_data_dir)
-            f_bin = open(file, "r")
+            f_bin = open(file, "rb")
 
             hits = []
             while True:
 
                 x_str = f_bin.read(2)
-                if x_str == '':  # eof
+                if x_str == b'':  # eof
                     break
 
                 x         = struct.unpack('<H', x_str)[0]
@@ -119,7 +119,7 @@ class VelodyneSyncData(BaseRawData, BaseConvert):
         pc2_msg.header.stamp = timestamp
         pc2_msg.header.frame_id = velodyne_link
 
-        num_values = points.shape[0]
+        num_values = int(points.shape[0])
         assert(num_values > 0)
 
         NUM_FIELDS = 5
@@ -128,10 +128,10 @@ class VelodyneSyncData(BaseRawData, BaseConvert):
         num_points = num_values / NUM_FIELDS
 
         assert(len(points.shape) == 1)
-        pc2_msg.height = 1
+        pc2_msg.height = int(1)
 
         FLOAT_SIZE_BYTES = 4
-        pc2_msg.width = num_values * FLOAT_SIZE_BYTES
+        pc2_msg.width = int(num_values * FLOAT_SIZE_BYTES)
 
         pc2_msg.fields = [
             PointField('x', 0, PointField.FLOAT32, 1),
@@ -142,13 +142,14 @@ class VelodyneSyncData(BaseRawData, BaseConvert):
         ]
 
         pc2_msg.is_bigendian = False
-        pc2_msg.point_step = NUM_FIELDS * FLOAT_SIZE_BYTES
+        pc2_msg.point_step = int(NUM_FIELDS * FLOAT_SIZE_BYTES)
 
-        pc2_msg.row_step = pc2_msg.point_step * num_points
+        pc2_msg.row_step = int(pc2_msg.point_step * num_points)
         pc2_msg.is_dense = False
 
-        pc2_msg.width = num_points
-        pc2_msg.data = np.asarray(points, np.float32).tostring()
+        pc2_msg.width = int(num_points)
+        # pc2_msg.data = np.asarray(points, np.float32).tostring()
+        pc2_msg.data = np.asarray(points, np.float32).tobytes()
 
         # create base_link velodyne_link static transformer
         vel_static_transform_stamped = geometry_msgs.msg.TransformStamped()

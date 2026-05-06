@@ -137,6 +137,14 @@ launch file for converting the raw data to rosbag files
 
 ## Usage
 
+#### Dependencies
+
+``` bash
+sudo apt update
+sudo apt install python3-tk # Needed for gui backend of matplotlib
+```
+
+pip install the python requirements via `pip install -r requirements.txt`
 
 #### building from source 
 

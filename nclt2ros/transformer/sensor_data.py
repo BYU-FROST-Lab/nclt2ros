@@ -483,6 +483,9 @@ class RosSensorMsg(BaseRawData, BaseConvert):
         yaw_rad   = gt_list[i, 6]
 
         # get upper diagonal of the covariance matrix
+        if self.i_gt >= gt_cov_list.shape[0]:
+            print(f"Warning: Ground truth covariance list index out of bounds at {self.i_gt} with input i={i}. Using last covariance matrix.")
+            self.i_gt = gt_cov_list.shape[0] - 1
         xx = gt_cov_list[self.i_gt, 1];  xy = gt_cov_list[self.i_gt, 2];  xz = gt_cov_list[self.i_gt, 3];  xr = gt_cov_list[self.i_gt, 4]
         xp = gt_cov_list[self.i_gt, 5];  xh = gt_cov_list[self.i_gt, 6];  yy = gt_cov_list[self.i_gt, 7];  yz = gt_cov_list[self.i_gt, 8]
         yr = gt_cov_list[self.i_gt, 9];  yp = gt_cov_list[self.i_gt, 10]; yh = gt_cov_list[self.i_gt, 11]; zz = gt_cov_list[self.i_gt, 12]
@@ -506,9 +509,12 @@ class RosSensorMsg(BaseRawData, BaseConvert):
         # odom.child_frame_id = 'base_link'
 
         # change due to the ENU frame
-        gt.pose.pose.position.x = y - 107.724666286       # x # TODO not hardcoding
-        gt.pose.pose.position.y = x - 75.829339527800     # y
-        gt.pose.pose.position.z = -z + 3.272894625813646  # z
+        gt_x = y - 107.724666286       # x # TODO not hardcoding
+        gt_y = x - 75.829339527800     # y
+        gt_z = -z + 3.272894625813646  # z
+        gt.pose.pose.position.x = gt_x
+        gt.pose.pose.position.y = gt_y
+        gt.pose.pose.position.z = gt_z
 
         # create quaternion from euler angles
         quaternion = tf.transformations.quaternion_from_euler(roll_rad, pitch_rad, yaw_rad)

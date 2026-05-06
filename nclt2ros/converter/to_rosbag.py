@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import rospy
+from tqdm import tqdm
 
 from nclt2ros.extractor.read_ground_truth import ReadGroundTruth
 from nclt2ros.extractor.read_ground_truth_covariance import ReadGroundTruthCovariance
@@ -141,30 +142,36 @@ class ToRosbag(BaseRawData, BaseConvert):
         max_num_messages = 1e20
         num_messages = 0
 
+        print(f"len(gt_list): {len(gt_list) if self.gt else 'N/A'}, len(gps_list): {len(gps_list) if self.sen else 'N/A'}, len(gps_rtk_list): {len(gps_rtk_list) if self.sen else 'N/A'}, len(ms25_list): {len(ms25_list) if self.sen else 'N/A'}, len(odom_list): {len(odom_list) if self.sen else 'N/A'}, len(vel_sync_timestamps_microsec): {len(vel_sync_timestamps_microsec) if self.vel else 'N/A'}, len(images_timestamps_microsec): {len(images_timestamps_microsec) if self.lb3 else 'N/A'}")
+        print(f"len(gt_cov_list): {len(gt_cov_list) if self.gt else 'N/A'}, len(odom_cov_list): {len(odom_cov_list) if self.sen else 'N/A'}, len(wheels_list): {len(wheels_list) if self.sen else 'N/A'}, len(kvh_list): {len(kvh_list) if self.sen else 'N/A'}")
+        size = (len(gt_list) if self.gt else 0) + (len(gps_list) if self.sen else 0) + (len(gps_rtk_list) if self.sen else 0) + (len(ms25_list) if self.sen else 0) + (len(odom_list) if self.sen else 0) + (len(vel_sync_timestamps_microsec) if self.vel else 0) + (len(images_timestamps_microsec) if self.lb3 else 0)
+        pbar = tqdm(total=size)
         while not rospy.is_shutdown():
+            if num_messages % 1000 == 0:
+                pbar.update(1000)
             next_packet = "done"
             next_utime = -1
 
             if self.gt:
-                if i_gt < len(gt_list) and (gt_list[i_gt, 0] < next_utime or next_utime < 0):
-                    next_utime = gt_list[i_gt, 0]
+                if i_gt < len(gt_list) and (gt_list[i_gt][0] < next_utime or next_utime < 0):
+                    next_utime = gt_list[i_gt][0]
                     next_packet = "gt"
 
             if self.sen:
-                if i_gps < len(gps_list) and (gps_list[i_gps, 0] < next_utime or next_utime < 0):
-                    next_utime = gps_list[i_gps, 0]
+                if i_gps < len(gps_list) and (gps_list[i_gps][0] < next_utime or next_utime < 0):
+                    next_utime = gps_list[i_gps][0]
                     next_packet = "gps"
 
-                if i_gps_rtk < len(gps_rtk_list) and (gps_rtk_list[i_gps_rtk, 0] < next_utime or next_utime < 0):
-                    next_utime = gps_rtk_list[i_gps_rtk, 0]
+                if i_gps_rtk < len(gps_rtk_list) and (gps_rtk_list[i_gps_rtk][0] < next_utime or next_utime < 0):
+                    next_utime = gps_rtk_list[i_gps_rtk][0]
                     next_packet = "gps_rtk"
 
-                if i_ms25 < len(ms25_list) and (ms25_list[i_ms25, 0] < next_utime or next_utime < 0):
-                    next_utime = ms25_list[i_ms25, 0]
+                if i_ms25 < len(ms25_list) and (ms25_list[i_ms25][0] < next_utime or next_utime < 0):
+                    next_utime = ms25_list[i_ms25][0]
                     next_packet = "ms25"
 
-                if i_odom < len(odom_list) and (odom_list[i_odom, 0] < next_utime or next_utime < 0):
-                    next_utime = odom_list[i_odom, 0]
+                if i_odom < len(odom_list) and (odom_list[i_odom][0] < next_utime or next_utime < 0):
+                    next_utime = odom_list[i_odom][0]
                     next_packet = "odom"
 
             if self.hokuyo:
@@ -255,7 +262,7 @@ class ToRosbag(BaseRawData, BaseConvert):
                 i_vel += 1
 
             elif next_packet == "img":
-                if self.cam_folder is 'all':
+                if self.cam_folder == 'all':
                     for camera_id in range(self.num_cameras):
                         cam_file = os.path.join(self.images_lb3_dir, 'Cam' + str(camera_id), str(next_utime) + '.tiff')
                         timestamp, image_msg, tf_static_msg = self.image_data.write_images(utime=next_utime, cam_file=cam_file)
@@ -271,8 +278,16 @@ class ToRosbag(BaseRawData, BaseConvert):
                 rospy.logerr("unknown packet type")
 
             num_messages += 1
-            if (num_messages % 5000) == 0:
-                rospy.loginfo("number messages written: %d" % num_messages)
+            # if (num_messages % 5000) == 0:
+            #     rospy.loginfo("number messages written: %d" % num_messages)
+            #     # i_gt      = 0
+            #     # i_gps     = 0
+            #     # i_gps_rtk = 0
+            #     # i_ms25    = 0
+            #     # i_odom    = 0
+            #     # i_vel     = 0
+            #     # i_img     = 0
+            #     rospy.loginfo(f"\ttypes of messages: i_gt={i_gt}, i_gps={i_gps}, i_gps_rtk={i_gps_rtk}, i_ms25={i_ms25}, i_odom={i_odom}, i_vel={i_vel}, i_img={i_img}")
 
             if num_messages >= max_num_messages:
                 break

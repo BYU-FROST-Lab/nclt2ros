@@ -36,7 +36,7 @@ class ImageData(BaseRawData, BaseConvert):
         # same timestamps in all folders
         files = os.listdir(self.images_lb3_dir + 'Cam0')
 
-        timestamps_microsec = sorted([long(os.path.splitext(f)[0]) for f in files if f.endswith('.tiff')])
+        timestamps_microsec = sorted([int(os.path.splitext(f)[0]) for f in files if f.endswith('.tiff')])
 
         return timestamps_microsec
 

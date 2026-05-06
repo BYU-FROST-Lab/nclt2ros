@@ -3,8 +3,8 @@
     <node name="nclt2rosbag" pkg="nclt2ros" type="nclt2visualizer" output="screen">
 
         <param name="date"          value="2012-01-15"/>
-        <param name="raw_data_path" value="/home/christian/nclt2ros/raw_data" />
-        <param name="plot_path"     value="/home/christian/nclt2ros/plots" />
+        <param name="raw_data_path" value="/root/data_sets/NCLT/raw_data" />
+        <param name="plot_path"     value="/root/data_sets/NCLT/plots" />
 
         <param name="show_plot"     value="False" />
 

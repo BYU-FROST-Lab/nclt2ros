@@ -32,7 +32,7 @@ class Visualize:
         self.v_odom_png = None
         self.v_all = None
 
-        for (key, value) in kwargs.iteritems():
+        for (key, value) in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
 
